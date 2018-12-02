@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 namespace wefa.ViewModels
 {
-    public class Request
+    public class FRMSRequest
     {
         public int FilingRequestId { get; set; }
         public string FilingRequest { get; set; }
+        public string FilingRequestStatus { get; set; }
         public string DocumentType { get; set; }
         public string PolicyClass { get; set; }
         public string PolicyType { get; set; }

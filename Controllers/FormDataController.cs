@@ -22,39 +22,48 @@ namespace wefa.Controllers
         }
 
         [HttpGet("[action]")]
-        public IEnumerable<Request> GetRequests()
+        public TrnFilingRequest GetFilingRequest(int filingRequestId)
         {
-            List<Request> requests = new List<Request>();
+            return _context.TrnFilingRequest.Include(fr => fr.TrnFormFilingRequest).FirstOrDefault(fr => fr.FilingRequestId == filingRequestId);
+        }
+
+        [HttpGet("[action]")]
+        public IEnumerable<FRMSRequest> GetRequests()
+        {
+            List<FRMSRequest> requests = new List<FRMSRequest>();
 
             foreach (var trnFilingRequest in _context.TrnFilingRequest
+                .Include(fr => fr.FilingRequestStatus)
                 .Include(fr => fr.TrnFormFilingRequest)
                     .ThenInclude(ffr => ffr.DocumentType)
                 .Include(fr => fr.TrnFilingRequestPolicyTypeXref)
                     .ThenInclude(frptx => frptx.PolicyType)
                 .Include(fr => fr.PolicyClass)
                 .Include(fr => fr.TrnFilingRequestReplaceFormXref)
+                .Where(fr => fr.FilingRequestTypeId == 1)
                 .OrderByDescending(fr => fr.FilingRequestId)
-                .Take(100)
+                //.Take(500)
                 .ToList())
             {
-                Request request = new Request()
+                FRMSRequest frmsRequest = new FRMSRequest()
                 {
                     FilingRequestId = trnFilingRequest.FilingRequestId,
-                    FilingRequest = $"FFR-{trnFilingRequest.TrnFormFilingRequest.FirstOrDefault()?.EditionDate:yy}-{trnFilingRequest.FilingRequestId:00000}",
-                    DocumentType = trnFilingRequest.TrnFormFilingRequest.FirstOrDefault()?.DocumentType?.Name,
+                    FilingRequest = $"FFR-{trnFilingRequest.TrnFormFilingRequest.First().EditionDate:yy}-{trnFilingRequest.FilingRequestId:00000}",
+                    FilingRequestStatus = trnFilingRequest.FilingRequestStatus?.Name,
+                    DocumentType = trnFilingRequest.TrnFormFilingRequest.First().DocumentType?.Name,
                     PolicyClass = trnFilingRequest.PolicyClass?.Name,
-                    PolicyType = trnFilingRequest.TrnFilingRequestPolicyTypeXref.FirstOrDefault()?.PolicyType?.Name,
-                    BaseFormIdString = trnFilingRequest.TrnFormFilingRequest.FirstOrDefault()?.BaseFormIdString,
-                    EditionDate = trnFilingRequest.TrnFormFilingRequest.FirstOrDefault()?.EditionDate.Value,
-                    ShortName = trnFilingRequest.TrnFormFilingRequest.FirstOrDefault()?.ShortName,
-                    Name = trnFilingRequest.TrnFormFilingRequest.FirstOrDefault()?.Name,
+                    PolicyType = String.Join(", ", trnFilingRequest.TrnFilingRequestPolicyTypeXref.Select(frptx => frptx.PolicyType.Name).OrderBy(e=>e).ToArray()),
+                    BaseFormIdString = trnFilingRequest.TrnFormFilingRequest.First().BaseFormIdString,
+                    EditionDate = trnFilingRequest.TrnFormFilingRequest.First().EditionDate.Value,
+                    ShortName = trnFilingRequest.TrnFormFilingRequest.First().ShortName,
+                    Name = trnFilingRequest.TrnFormFilingRequest.First().Name,
                     FrsName = "",
-                    ReplacesExistingForm = trnFilingRequest.TrnFormFilingRequest.FirstOrDefault()?.ReplacesExistingForm,
+                    ReplacesExistingForm = trnFilingRequest.TrnFilingRequestReplaceFormXref.Any(),
                     ReplacesExistingFormName = trnFilingRequest.TrnFilingRequestReplaceFormXref.FirstOrDefault()?.BaseFormIdString,
                     ReplacesExistingFormEditionDate = trnFilingRequest.TrnFilingRequestReplaceFormXref.FirstOrDefault()?.EditionDate
                 };
 
-                requests.Add(request);
+                requests.Add(frmsRequest);
             }
 
             return requests;

@@ -1,6 +1,7 @@
-export interface Request {
+export interface FRMSRequest {
     filingRequestId: number;
     filingRequest: string;
+    filingRequestStatus: string;
     documentType: string;
     policyClass: string;
     policyType: string;
