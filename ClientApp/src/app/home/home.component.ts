@@ -2,7 +2,7 @@ import { Component, Inject } from '@angular/core';
 import { RequestsService } from '../services/requests.service';
 import { Observable } from 'rxjs';
 
-let dateFormat = require('../../../node_modules/dateformat/lib');
+import {dateFormat} from 'dateformat';
 
 @Component({
   selector: 'app-home',
@@ -17,7 +17,7 @@ export class HomeComponent {
     { headerName: 'Filing Request', field: 'filingRequest' },
     { headerName: 'Filing Request Status', field: 'filingRequestStatus', filter: 'agSetColumnFilter', supressMenu: 'true' },
     { headerName: 'BaseFormIdString', field: 'baseFormIdString' },
-    { headerName: 'Edition Date', field: 'editionDate', valueFormatter: params => { const d = new Date(params.value); return dateFormat(d, 'mm/yy'); } },
+    { headerName: 'Edition Date', field: 'editionDate' },
     { headerName: 'Document Type', field: 'documentType' },
     { headerName: 'Policy Class', field: 'policyClass' },
     { headerName: 'Policy Type', field: 'policyType' },
